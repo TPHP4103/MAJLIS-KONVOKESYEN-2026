@@ -1,0 +1,407 @@
+```html
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 Cabutan Giliran Konvokesyen 2026</title>
+
+<style>
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+min-height:100vh;
+font-family:Arial,sans-serif;
+background:linear-gradient(135deg,#6a11cb,#2575fc);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.container{
+width:100%;
+max-width:800px;
+text-align:center;
+}
+
+h1{
+font-size:2.2rem;
+margin-bottom:5px;
+}
+
+.subtitle{
+margin-top:0;
+opacity:.9;
+}
+
+.card{
+background:rgba(255,255,255,.15);
+backdrop-filter:blur(12px);
+border-radius:25px;
+padding:30px 20px;
+box-shadow:0 15px 40px rgba(0,0,0,.25);
+}
+
+select{
+width:100%;
+padding:15px;
+border:none;
+border-radius:15px;
+font-size:16px;
+margin-bottom:15px;
+}
+
+.number{
+font-size:6rem;
+font-weight:bold;
+color:#ffe600;
+text-shadow:0 4px 10px rgba(0,0,0,.3);
+min-height:110px;
+}
+
+.name{
+background:white;
+color:#222;
+border-radius:18px;
+padding:20px;
+min-height:90px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:1.3rem;
+font-weight:bold;
+line-height:1.35;
+margin:10px 0 25px;
+}
+
+button{
+border:none;
+border-radius:50px;
+padding:16px 35px;
+font-size:1.1rem;
+font-weight:bold;
+cursor:pointer;
+margin:6px;
+}
+
+.draw{
+background:#ffe600;
+color:#222;
+}
+
+.reset{
+background:#ff4b5c;
+color:white;
+}
+
+.status{
+margin-top:15px;
+font-weight:bold;
+}
+
+.history{
+margin-top:25px;
+text-align:left;
+background:rgba(0,0,0,.15);
+padding:15px;
+border-radius:15px;
+}
+
+.history h3{
+margin-top:0;
+text-align:center;
+}
+
+.history-list{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:8px;
+}
+
+.history-item{
+background:rgba(255,255,255,.18);
+padding:9px;
+border-radius:10px;
+font-size:.9rem;
+}
+
+@keyframes spin{
+0%{transform:scale(1);}
+50%{transform:scale(1.15) rotate(3deg);}
+100%{transform:scale(1);}
+}
+
+.spinning{
+animation:spin .15s infinite;
+}
+
+@media(max-width:500px){
+.number{
+font-size:4.5rem;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎓 CABUTAN GILIRAN KONVOKESYEN 2026</h1>
+<p class="subtitle">Pilih Tabika dan Cabut Nombor Giliran</p>
+
+<div class="card">
+
+<select id="tabikaSelect">
+<option value="">-- PILIH TABIKA --</option>
+</select>
+
+<div id="number" class="number">?</div>
+
+<div id="name" class="name">
+Pilih tabika terlebih dahulu
+</div>
+
+<button class="draw" onclick="drawNumber()">
+🎲 CABUT NOMBOR
+</button>
+
+<button class="reset" onclick="resetGame()">
+🔄 RESET
+</button>
+
+<div id="status" class="status">
+37 nombor masih ada
+</div>
+
+<div class="history">
+<h3>📋 Senarai Giliran</h3>
+<div id="historyList" class="history-list"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+const classes = [
+"TP RPR BANDAR BARU PERMYJAYA DAHLIA",
+"TP RPR BANDAR BARU PERMYJAYA KASTURI",
+"TP RPR BANDAR BARU PERMYJAYA JASMIN",
+"TP RPR BANDAR BARU PERMYJAYA MAWAR",
+"TP RPR BANDAR BARU PERMYJAYA ALLAMANDA",
+"TP RPR BANDAR BARU PERMYJAYA RAFFLESIA",
+"TP RPR BANDAR BARU PERMYJAYA KEMBOJA",
+"TP RPR BANDAR BARU PERMYJAYA KIAMBANG",
+"TP RPR BANDAR BARU PERMYJAYA TERATAI",
+"TP RPR BANDAR BARU PERMYJAYA KEKWA",
+"TP RPR BANDAR BARU PERMYJAYA SELASIH",
+"TP KAMPUNG PANGKALAN LUTONG SEROJA",
+"TP KAMPUNG PANGKALAN LUTONG CEMPAKA",
+"TP DESA SENADIN",
+"TP DESA SENADIN PALMA",
+"TP KAMPUNG PULAU MELAYU",
+"TP RPR BATU 6",
+"TP TUDAN ROS",
+"TP TAMAN BUMIKO MELUR",
+"TP POLIS KOMPLEKS",
+"TP KAMPUNG LOPENG TENGAH",
+"TP KAMPUNG LOPENG TENGAH SIANTAN",
+"TP TAMAN TUNKU TANJUNG",
+"TP TAMAN TUNKU MATAHARI",
+"TP TUDAN RAYA",
+"TP TUDAN LILY",
+"TP TUDAN ANGGERIK",
+"TP KUALA BARAM ALOE VERA",
+"TP KUALA BARAM ORKID",
+"TP HOLIDAY PARK",
+"TP HOLIDAY PARK AKASIA",
+"TP KAMPUNG LUAK",
+"TP PPR SUNGAI RAIT DAISY",
+"TP PPR SUNGAI RAIT KENANGA",
+"TP PPR SUNGAI RAIT BOURGENVILLA",
+"TP BAKAM",
+"TASKA PERPADUAN TAMAN BUMIKO"
+];
+
+let availableNumbers = [];
+let assigned = {};
+
+function loadDropdown(){
+
+const select =
+document.getElementById("tabikaSelect");
+
+select.innerHTML =
+'<option value="">-- PILIH TABIKA --</option>';
+
+classes.forEach(tabika => {
+
+if(!assigned[tabika]){
+
+const option =
+document.createElement("option");
+
+option.value = tabika;
+option.textContent = tabika;
+
+select.appendChild(option);
+
+}
+
+});
+
+}
+
+function resetGame(){
+
+availableNumbers = [];
+
+for(let i=1;i<=37;i++){
+availableNumbers.push(i);
+}
+
+assigned = {};
+
+document.getElementById("number").textContent = "?";
+
+document.getElementById("name").textContent =
+"Pilih tabika terlebih dahulu";
+
+loadDropdown();
+
+updateScreen();
+
+}
+
+function drawNumber(){
+
+const select =
+document.getElementById("tabikaSelect");
+
+const tabika =
+select.value;
+
+if(tabika === ""){
+
+alert("Sila pilih tabika.");
+return;
+
+}
+
+if(availableNumbers.length === 0){
+
+document.getElementById("name").textContent =
+"🎉 Semua nombor telah habis!";
+return;
+
+}
+
+const numberEl =
+document.getElementById("number");
+
+const nameEl =
+document.getElementById("name");
+
+nameEl.textContent =
+"🎲 Sedang membuat cabutan...";
+
+numberEl.classList.add("spinning");
+
+let count = 0;
+
+const animation = setInterval(() => {
+
+const temp =
+availableNumbers[
+Math.floor(
+Math.random() *
+availableNumbers.length
+)
+];
+
+numberEl.textContent = temp;
+
+count++;
+
+if(count >= 15){
+
+clearInterval(animation);
+
+numberEl.classList.remove("spinning");
+
+const index =
+Math.floor(
+Math.random() *
+availableNumbers.length
+);
+
+const result =
+availableNumbers.splice(index,1)[0];
+
+assigned[tabika] =
+result;
+
+numberEl.textContent =
+result;
+
+nameEl.textContent =
+tabika;
+
+loadDropdown();
+
+updateScreen();
+
+}
+
+},100);
+
+}
+
+function updateScreen(){
+
+document.getElementById("status").textContent =
+availableNumbers.length +
+" nombor masih ada • " +
+Object.keys(assigned).length +
+" sudah dicabut";
+
+const list =
+document.getElementById("historyList");
+
+list.innerHTML = "";
+
+Object.entries(assigned)
+.sort((a,b)=>a[1]-b[1])
+.forEach(([name,number]) => {
+
+const div =
+document.createElement("div");
+
+div.className =
+"history-item";
+
+div.innerHTML =
+"<strong>No. " +
+number +
+"</strong><br>" +
+name;
+
+list.appendChild(div);
+
+});
+
+}
+
+resetGame();
+
+</script>
+
+</body>
+</html>
+```
